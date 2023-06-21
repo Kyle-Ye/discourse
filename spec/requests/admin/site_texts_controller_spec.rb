@@ -213,11 +213,21 @@ RSpec.describe Admin::SiteTextsController do
               expected_translations.map do |key, value|
                 overridden =
                   defined?(expected_overridden) ? expected_overridden[key] || false : false
+                interpolation_keys =
+                  (
+                    if defined?(expected_interpolation_keys)
+                      expected_interpolation_keys[key] || []
+                    else
+                      []
+                    end
+                  )
                 {
                   id: "colour.#{key}",
                   value: value,
                   can_revert: overridden,
                   overridden: overridden,
+                  interpolation_keys: interpolation_keys,
+                  has_interpolation_keys: interpolation_keys.present?,
                 }
               end
 
@@ -228,6 +238,7 @@ RSpec.describe Admin::SiteTextsController do
         context "with English" do
           let(:locale) { :en }
           let(:expected_translations) { { one: "%{count} colour", other: "%{count} colours" } }
+          let(:expected_interpolation_keys) { { one: ["count"], other: ["count"] } }
 
           include_examples "finds correct plural keys"
         end
@@ -242,6 +253,7 @@ RSpec.describe Admin::SiteTextsController do
               other: "%{count} colours",
             }
           end
+          let(:expected_interpolation_keys) { { one: ["count"], other: ["count"] } }
 
           include_examples "finds correct plural keys"
         end
@@ -266,6 +278,9 @@ RSpec.describe Admin::SiteTextsController do
               other: "%{count} colours",
             }
           end
+          let(:expected_interpolation_keys) do
+            { one: ["count"], few: ["count"], many: ["count"], other: ["count"] }
+          end
 
           include_examples "finds correct plural keys"
         end
@@ -286,6 +301,9 @@ RSpec.describe Admin::SiteTextsController do
           let(:locale) { :ru }
           let(:expected_translations) do
             { one: "ONE", few: "FEW", many: "%{count} цветов", other: "%{count} colours" }
+          end
+          let(:expected_interpolation_keys) do
+            { one: ["count"], few: ["count"], many: ["count"], other: ["count"] }
           end
           let(:expected_overridden) { { one: true, few: true } }
 
